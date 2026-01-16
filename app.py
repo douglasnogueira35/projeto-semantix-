@@ -176,61 +176,33 @@ if arquivo:
         st.download_button("⬇️ Download CSV", csv, "relatorio.csv", "text/csv")
 
         # Exportar Excel
-    with pd.ExcelWriter("relatorio.xlsx", engine="xlsxwriter") as writer:
+        with pd.ExcelWriter("relatorio.xlsx", engine="xlsxwriter") as writer:
             df_resultados.to_excel(writer, sheet_name="Resultados")
             pd.DataFrame({"Relatório": [relatorio_texto]}).to_excel(writer, sheet_name="Relatorio")
-    with open("relatorio.xlsx", "rb") as f:
+        with open("relatorio.xlsx", "rb") as f:
             st.download_button("⬇️ Download Excel", f, "relatorio.xlsx")
 
         # Exportar SQLite
-    conn = sqlite3.connect("relatorio.db")
-    df_resultados.to_sql("resultados", conn, if_exists="replace", index=False)
-    pd.DataFrame({"Relatório": [relatorio_texto]}).to_sql("relatorio", conn, if_exists="replace", index=False)
-    conn.close()
-    with open("relatorio.db", "rb") as f:
+        conn = sqlite3.connect("relatorio.db")
+        df_resultados.to_sql("resultados", conn, if_exists="replace", index=False)
+        pd.DataFrame({"Relatório": [relatorio_texto]}).to_sql("relatorio", conn, if_exists="replace", index=False)
+        conn.close()
+        with open("relatorio.db", "rb") as f:
             st.download_button("⬇️ Download SQLite", f, "relatorio.db")
+
     with aba3:
         st.subheader("📈 Dashboard Interativo")
 
-        # Distribuição do alvo
+                # Distribuição do alvo
         if len(y) > 0:
             dist_df = y.value_counts().reset_index()
             dist_df.columns = ["Classe/Valor", "Contagem"]
 
-            fig = px.bar(dist_df,
-                         x="Classe/Valor", y="Contagem",
-                         labels={"Classe/Valor": "Classe/Valor", "Contagem": "Contagem"},
-                         title="Distribuição do Alvo")
-            st.plotly_chart(fig, use_container_width=True)
-
-        modelo_final = modelos_treinados.get(melhor_modelo)
-
-        # Matriz de Confusão
-        if problema == "classificacao" and modelo_final and len(y_test) > 0:
-            y_pred = modelo_final.predict(X_test)
-            cm = confusion_matrix(y_test, y_pred)
-            cm_df = pd.DataFrame(cm,
-                                 index=[f"Real {c}" for c in np.unique(y_test)],
-                                 columns=[f"Prev {c}" for c in np.unique(y_test)])
-            fig = px.imshow(cm_df,
-                            text_auto=True,
-                            color_continuous_scale="Blues",
-                            title="Matriz de Confusão Interativa")
-            st.plotly_chart(fig, use_container_width=True)
-
-        # Importância das variáveis
-                # Importância das variáveis
-        if modelo_final and hasattr(modelo_final, "feature_importances_"):
-            importancias = pd.Series(
-                modelo_final.feature_importances_,
-                index=df.drop(columns=[alvo]).select_dtypes(include=[np.number]).columns
-            ).sort_values(ascending=False)
-
             fig = px.bar(
-                importancias,
-                x=importancias.index,
-                y=importancias.values,
-                labels={"x": "Variável", "y": "Importância"},
-                title="Importância das Variáveis"
+                dist_df,
+                x="Classe/Valor",
+                y="Contagem",
+                labels={"Classe/Valor": "Classe/Valor", "Contagem": "Contagem"},
+                title="Distribuição do Alvo"
             )
             st.plotly_chart(fig, use_container_width=True)
