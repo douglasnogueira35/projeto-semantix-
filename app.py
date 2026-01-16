@@ -23,6 +23,29 @@ import plotly.express as px
 # Configuração inicial
 st.set_page_config(page_title="AutoML Inteligente", layout="wide")
 st.title("🚀 AutoML Inteligente – Análise Automática de Dados")
+# Função para normalizar nome do arquivo
+def normalizar_nome_arquivo(file):
+    nome = file.name  # corrigido: pega o nome do arquivo enviado
+    nome_base, extensao = os.path.splitext(nome)
+    return nome_base.lower(), extensao.lower()
+
+# Função para carregar dados
+@st.cache_data
+def carregar_dados(file):
+    nome_base, extensao = normalizar_nome_arquivo(file)
+
+    if extensao == ".csv":
+        df = pd.read_csv(file)
+    elif extensao == ".pkl":
+        df = pd.read_pickle(file)
+    elif extensao == ".ftr":
+        df = pd.read_feather(file)
+    else:
+        st.error("Formato de arquivo não suportado. Use CSV, PKL ou FTR.")
+        return None
+
+    return df
+
 
 def calcular_metricas(y_real, y_previsto, problema="classificacao"):
     if problema == "classificacao":
