@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 import sqlite3
 from math import sqrt
 
@@ -13,12 +14,11 @@ from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score,
-    f1_score, confusion_matrix,
+    f1_score, confusion_matrix, ConfusionMatrixDisplay,
     mean_squared_error, mean_absolute_error, r2_score
 )
 
 from xgboost import XGBClassifier, XGBRegressor
-import plotly.express as px
 
 # Configuração inicial
 st.set_page_config(page_title="AutoML Inteligente", layout="wide")
@@ -142,7 +142,7 @@ if arquivo:
     aba1, aba2, aba3 = st.tabs([
         "📊 Comparação dos Modelos",
         "📑 Relatório Final",
-        "📈 Dashboard Interativo"
+        "📈 Gráficos Explicativos"
     ])
 
     with aba1:
@@ -152,7 +152,6 @@ if arquivo:
 
     with aba2:
         st.subheader("📑 Relatório Final")
-
         if problema == "classificacao":
             melhor_modelo = df_resultados["f1_cv"].idxmax()
             criterio = "F1-Score médio em validação cruzada"
@@ -169,39 +168,17 @@ if arquivo:
         st.markdown(relatorio_texto)
 
         st.subheader("💾 Exportar Relatórios")
-
-        # Exportar CSV
         csv_buffer = "Relatório Final\n" + relatorio_texto + "\n\n" + df_resultados.to_csv()
         csv = csv_buffer.encode("utf-8")
         st.download_button("⬇️ Download CSV", csv, "relatorio.csv", "text/csv")
 
-        # Exportar Excel
-    with pd.ExcelWriter("relatorio.xlsx", engine="xlsxwriter") as writer:
-            df_resultados.to_excel(writer, sheet_name="Resultados")
-            pd.DataFrame({"Relatório": [relatorio_texto]}).to_excel(writer, sheet_name="Relatorio")
-    with open("relatorio.xlsx", "rb") as f:
-            st.download_button("⬇️ Download Excel", f, "relatorio.xlsx")
-
-        # Exportar SQLite
-    conn = sqlite3.connect("relatorio.db")
-    df_resultados.to_sql("resultados", conn, if_exists="replace", index=False)
-    pd.DataFrame({"Relatório": [relatorio_texto]}).to_sql("relatorio", conn, if_exists="replace", index=False)
-    conn.close()
-    with open("relatorio.db", "rb") as f:
-            st.download_button("⬇️ Download SQLite", f, "relatorio.db")
     with aba3:
-        st.subheader("📈 Dashboard Interativo")
+        st.subheader("📈 Gráficos Explicativos")
 
         # Distribuição do alvo
         if len(y) > 0:
-            dist_df = y.value_counts().reset_index()
-            dist_df.columns = ["Classe/Valor", "Contagem"]
-
-            fig = px.bar(dist_df,
-                         x="Classe/Valor", y="Contagem",
-                         labels={"Classe/Valor": "Classe/Valor", "Contagem": "Contagem"},
-                         title="Distribuição do Alvo")
-            st.plotly_chart(fig, use_container_width=True)
+            st.write("Distribuição do Alvo")
+            st.bar_chart(y.value_counts())
 
         modelo_final = modelos_treinados.get(melhor_modelo)
 
@@ -209,28 +186,31 @@ if arquivo:
         if problema == "classificacao" and modelo_final and len(y_test) > 0:
             y_pred = modelo_final.predict(X_test)
             cm = confusion_matrix(y_test, y_pred)
-            cm_df = pd.DataFrame(cm,
-                                 index=[f"Real {c}" for c in np.unique(y_test)],
-                                 columns=[f"Prev {c}" for c in np.unique(y_test)])
-            fig = px.imshow(cm_df,
-                            text_auto=True,
-                            color_continuous_scale="Blues",
-                            title="Matriz de Confusão Interativa")
-            st.plotly_chart(fig, use_container_width=True)
+            fig, ax = plt.subplots()
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+            disp.plot(ax=ax, cmap="Blues", colorbar=False)
+            st.pyplot(fig)
 
         # Importância das variáveis
-                # Importância das variáveis
         if modelo_final and hasattr(modelo_final, "feature_importances_"):
             importancias = pd.Series(
                 modelo_final.feature_importances_,
                 index=df.drop(columns=[alvo]).select_dtypes(include=[np.number]).columns
             ).sort_values(ascending=False)
+            fig, ax = plt.subplots()
+            importancias.plot(kind="bar", ax=ax, color="skyblue", edgecolor="black")
+            ax.set_title("Importância das Variáveis")
+            st.pyplot(fig)
 
-            fig = px.bar(
-                importancias,
-                x=importancias.index,
-                y=importancias.values,
-                labels={"x": "Variável", "y": "Importância"},
-                title="Importância das Variáveis"
-            )
-            st.plotly_chart(fig, use_container_width=True)
+        #         # Regressão: valores reais vs previstos
+        if problema == "regressao" and modelo_final and len(y_test) > 0:
+            try:
+                y_pred = modelo_final.predict(X_test)
+                fig, ax = plt.subplots()
+                ax.scatter(y_test, y_pred, alpha=0.6, color="green")
+                ax.set_xlabel("Valores Reais")
+                ax.set_ylabel("Valores Previstos")
+                ax.set_title("Comparação entre valores reais e previstos")
+                st.pyplot(fig)
+            except Exception as e:
+                st.warning(f"Não foi possível gerar gráfico de regressão: {e}")
