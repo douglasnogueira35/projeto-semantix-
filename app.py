@@ -184,7 +184,7 @@ if df is not None:
             )
 
     with aba_relatorio:
-    st.subheader("📑 Relatório Final e Insights de Negócio")
+     st.subheader("📑 Relatório Final e Insights de Negócio")
     if resultados:
         melhor_modelo = max(resultados.items(), key=lambda x: x[1].get("R2", x[1].get("f1", 0)))
         nome_modelo, metricas = melhor_modelo
