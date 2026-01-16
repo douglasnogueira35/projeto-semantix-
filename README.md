@@ -1,73 +1,127 @@
-# 📘 README – Projeto AutoML Inteligente
+# 📑 Projeto AutoML – Previsão de Renda
 
-## 📌 Contexto
-Este projeto tem como objetivo aplicar técnicas de **AutoML** para análise automática de dados, utilizando diferentes modelos de aprendizado de máquina para prever variáveis alvo.  
-Na execução relatada, foi utilizada a variável **`renda`** como alvo, e o sistema identificou o problema como sendo de **regressão**.
+## 📌 Visão Geral
+Este projeto utiliza **Streamlit** para criar uma aplicação interativa de **AutoML**, permitindo carregar datasets em diferentes formatos (CSV, Excel, SQLite, MySQL, PostgreSQL, SQL Server), treinar modelos automaticamente e gerar relatórios em múltiplos formatos (TXT, CSV, Excel, PDF e ZIP).
 
----
-
-## ⚡ Configuração
-- Dataset reduzido para **100 linhas** (modo rápido).  
-- Ferramenta utilizada: **Streamlit** para interface interativa.  
-- Modelos avaliados:  
-  - Regressão Linear  
-  - Random Forest Regressor  
-  - XGBRegressor  
+O objetivo principal é prever a **coluna alvo: `renda`**, aplicando técnicas de regressão e comparando diferentes algoritmos.
 
 ---
 
-## 🔍 Visualização dos Dados
-- O usuário pôde explorar os dados carregados diretamente na interface.  
-- A coluna alvo selecionada foi **`renda`**.  
-- O sistema automaticamente detectou que se trata de um problema de **regressão**, pois a variável alvo é numérica e contínua.
+## ⚙️ Funcionalidades
+- Upload de arquivos em **CSV, Excel, SQLite**.  
+- Conexão com bancos externos (**MySQL, PostgreSQL, SQL Server**) via SQLAlchemy.  
+- Detecção automática do tipo de problema (**classificação ou regressão**).  
+- Treinamento de múltiplos modelos (Regressão Linear, Random Forest, XGBoost).  
+- Avaliação com métricas adequadas (R², RMSE, F1, Accuracy).  
+- Visualização interativa dos resultados com **Plotly**.  
+- Relatórios finais disponíveis em **TXT, CSV, Excel, PDF e ZIP**.  
 
 ---
 
-## 🤖 Treinamento dos Modelos
-Os seguintes modelos foram treinados com o dataset reduzido:
+## 📊 Resultados
+- **Coluna alvo:** `renda`  
+- **Melhor modelo:** `XGBRegressor`  
+- **Desempenho obtido:**
+  ```json
+  {
+    "R2": 0.4059,
+    "RMSE": 21439.14,
+    "R2_cv": -0.3623,
+    "tempo": 0.91
+  }
+  🔎 Insights de Negócio
+O modelo de regressão pode apoiar:
+- Previsões de vendas com base em renda estimada.
+- Estimativas de receita futura para planejamento estratégico.
+- Análise de impacto de variáveis econômicas sobre o poder de compra.
+- Segmentação de clientes considerando faixas de renda previstas.
 
-| Modelo                   | Tempo de Treinamento |
-|---------------------------|----------------------|
-| Regressão Linear          | 0,01s               |
-| Random Forest Regressor   | 0,24s               |
-| XGBRegressor              | 0,07s               |
+🚀 Como Executar
+- Clone este repositório:
+git clone <url-do-repositorio>
+- Instale as dependências:
+pip install -r requirements.txt
+- Execute o app:
+streamlit run app.py
+- 
+Claro, Douglas 🙌. Aqui está o README.md completo em um único bloco de texto, pronto para você copiar e colar direto no seu repositório ou projeto:
+# 📑 Projeto AutoML – Previsão de Renda
 
----
+## 📌 Visão Geral
+Este projeto utiliza **Streamlit** para criar uma aplicação interativa de **AutoML**, permitindo carregar datasets em diferentes formatos (CSV, Excel, SQLite, MySQL, PostgreSQL, SQL Server), treinar modelos automaticamente e gerar relatórios em múltiplos formatos (TXT, CSV, Excel, PDF e ZIP).
 
-## 📊 Comparação dos Modelos
-Após o treinamento, os modelos foram comparados utilizando métricas de regressão, com destaque para o **R² médio em validação cruzada**.
-
----
-
-## 📑 Relatório Final
-O modelo escolhido foi **XGBRegressor**, pois apresentou o melhor desempenho segundo o critério de **R² médio em validação cruzada**, com valor de **-0.0125**.  
-
-> Observação: O valor negativo de R² indica que os modelos não conseguiram explicar bem a variabilidade da variável alvo `renda` neste dataset reduzido. Isso pode ocorrer devido ao tamanho pequeno da amostra ou à ausência de variáveis explicativas relevantes.
-
----
-
-## 📈 Dashboard Interativo
-O projeto inclui um **dashboard interativo** que permite:
-- Visualizar a distribuição da variável alvo.  
-- Explorar métricas de desempenho dos modelos.  
-- Analisar a matriz de confusão (em problemas de classificação).  
-- Avaliar a importância das variáveis (em modelos baseados em árvores, como Random Forest e XGBRegressor).  
-
----
-
-## 🎯 Conclusões
-- A variável alvo escolhida foi **`renda`**.  
-- O problema foi corretamente identificado como **regressão**.  
-- Entre os modelos testados, o **XGBRegressor** apresentou o melhor desempenho, ainda que com R² negativo.  
-- O resultado sugere que, para melhorar a performance, seria necessário:
-  - Utilizar um dataset maior (mais linhas).  
-  - Incluir variáveis explicativas adicionais.  
-  - Realizar ajustes de hiperparâmetros nos modelos.  
+O objetivo principal é prever a **coluna alvo: `renda`**, aplicando técnicas de regressão e comparando diferentes algoritmos.
 
 ---
 
-## 🚀 Próximos Passos
-- Expandir o dataset para além das 100 linhas do modo rápido.  
-- Explorar novas variáveis e criar features derivadas.  
-- Testar técnicas de regularização e tuning de hiperparâmetros.  
-- Avaliar métricas adicionais como RMSE e MAE para complementar a análise.
+## ⚙️ Funcionalidades
+- Upload de arquivos em **CSV, Excel, SQLite**.  
+- Conexão com bancos externos (**MySQL, PostgreSQL, SQL Server**) via SQLAlchemy.  
+- Detecção automática do tipo de problema (**classificação ou regressão**).  
+- Treinamento de múltiplos modelos (Regressão Linear, Random Forest, XGBoost).  
+- Avaliação com métricas adequadas (R², RMSE, F1, Accuracy).  
+- Visualização interativa dos resultados com **Plotly**.  
+- Relatórios finais disponíveis em **TXT, CSV, Excel, PDF e ZIP**.  
+
+---
+
+## 📊 Resultados
+- **Coluna alvo:** `renda`  
+- **Melhor modelo:** `XGBRegressor`  
+- **Desempenho obtido:**
+  ```json
+  {
+    "R2": 0.4059,
+    "RMSE": 21439.14,
+    "R2_cv": -0.3623,
+    "tempo": 0.91
+  }
+
+
+
+🔎 Insights de Negócio
+O modelo de regressão pode apoiar:
+- Previsões de vendas com base em renda estimada.
+- Estimativas de receita futura para planejamento estratégico.
+- Análise de impacto de variáveis econômicas sobre o poder de compra.
+- Segmentação de clientes considerando faixas de renda previstas.
+
+🚀 Como Executar
+- Clone este repositório:
+git clone <url-do-repositorio>
+- Instale as dependências:
+pip install -r requirements.txt
+- Execute o app:
+streamlit run app.py
+- Acesse no navegador:
+http://localhost:8501
+
+
+Ou utilize diretamente a versão hospedada no Streamlit Cloud:
+👉 Abrir aplicação
+
+📥 Relatórios
+O usuário pode baixar o relatório final em diferentes formatos:
+- .txt → resumo textual
+- .csv → tabela de métricas
+- .xlsx → planilha Excel
+- .pdf → relatório formatado
+🛠️ Tecnologias Utilizadas
+- Python 3.13
+- Streamlit
+- Pandas / NumPy
+- Scikit-learn
+- XGBoost
+- Plotly
+- ReportLab
+- SQLAlchemy
+🛠️ Tecnologias Utilizadas
+- Python 3.13
+- Streamlit
+- Pandas / NumPy
+- Scikit-learn
+- XGBoost
+- Plotly
+- ReportLab
+- SQLAlchemy
+
