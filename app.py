@@ -184,25 +184,61 @@ if df is not None:
             )
 
     with aba_relatorio:
-        st.subheader("📑 Relatório Final e Insights de Negócio")
-        if resultados:
-            melhor_modelo = max(resultados.items(), key=lambda x: x[1].get("R2", x[1].get("f1", 0)))
-            nome_modelo, metricas = melhor_modelo
+    st.subheader("📑 Relatório Final e Insights de Negócio")
+    if resultados:
+        melhor_modelo = max(resultados.items(), key=lambda x: x[1].get("R2", x[1].get("f1", 0)))
+        nome_modelo, metricas = melhor_modelo
 
-            st.write(f"✅ O melhor modelo foi **{nome_modelo}** com desempenho:")
-            st.write(metricas)
+        st.write(f"✅ O melhor modelo foi **{nome_modelo}** com desempenho:")
+        st.write(metricas)
 
-            relatorio = f"""
-            Relatório Final:
-            - Tipo de problema: {problema.upper()}
-            - Melhor modelo: {nome_modelo}
-            - Principais métricas: {metricas}
-            """
+        relatorio = f"""
+        Relatório Final:
+        - Tipo de problema: {problema.upper()}
+        - Melhor modelo: {nome_modelo}
+        - Principais métricas: {metricas}
+        """
 
-            # TXT
-            st.download_button(
-                label="📥 Baixar relatório em TXT",
-                data=relatorio.encode("utf-8"),
-                file_name="relatorio_final.txt",
-                mime="text/plain"
-            )
+        # TXT
+        st.download_button(
+            label="📥 Baixar relatório em TXT",
+            data=relatorio.encode("utf-8"),
+            file_name="relatorio_final.txt",
+            mime="text/plain"
+        )
+
+        # CSV
+        st.download_button(
+            label="📥 Baixar relatório em CSV",
+            data=pd.DataFrame([metricas]).to_csv(index=False).encode("utf-8"),
+            file_name="relatorio_final.csv",
+            mime="text/csv"
+        )
+
+        # Excel
+        buffer_excel = io.BytesIO()
+        pd.DataFrame([metricas]).to_excel(buffer_excel, index=False)
+        st.download_button(
+            label="📥 Baixar relatório em Excel",
+            data=buffer_excel.getvalue(),
+            file_name="relatorio_final.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+        # PDF
+        buffer_pdf = io.BytesIO()
+        c = canvas.Canvas(buffer_pdf, pagesize=letter)
+        c.drawString(50, 750, "Relatório Final")
+        c.drawString(50, 730, f"Tipo de problema: {problema.upper()}")
+        c.drawString(50, 710, f"Melhor modelo: {nome_modelo}")
+        c.drawString(50, 690, f"Métricas: {metricas}")
+        c.save()
+        pdf_bytes = buffer_pdf.getvalue()
+        buffer_pdf.close()
+
+        st.download_button(
+            label="📥 Baixar relatório em PDF",
+            data=pdf_bytes,
+            file_name="relatorio_final.pdf",
+            mime="application/pdf"
+        )
