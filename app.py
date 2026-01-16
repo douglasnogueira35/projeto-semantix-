@@ -22,6 +22,19 @@ if arquivo is not None:
     df = pd.read_csv(arquivo)
     st.write("📊 Visualização inicial dos dados:", df.head())
 
+    # Sidebar para escolher quantidade de linhas
+    st.sidebar.header("⚙️ Configurações")
+    max_linhas = len(df)
+    qtd_linhas = st.sidebar.slider(
+        "📏 Quantidade de linhas para usar",
+        min_value=50,
+        max_value=max_linhas,
+        value=min(1000, max_linhas),
+        step=50
+    )
+    df = df.head(qtd_linhas)
+    st.sidebar.write(f"✅ Usando {qtd_linhas} linhas do dataset")
+
     # =========================================
     # 2. Seleção da coluna alvo
     # =========================================
@@ -30,7 +43,16 @@ if arquivo is not None:
     X = df.drop(columns=[alvo])
 
     # =========================================
-    # 3. Detecção do tipo de problema
+    # 3. Pré-processamento dos dados
+    # =========================================
+    if "data_ref" in X.columns:
+        X["data_ref"] = pd.to_datetime(X["data_ref"], errors="coerce").astype(int) / 10**9
+
+    X = pd.get_dummies(X, drop_first=True)
+    X = X.fillna(0)
+
+    # =========================================
+    # 4. Detecção do tipo de problema
     # =========================================
     if pd.api.types.is_numeric_dtype(y) and y.nunique() > 15:
         problema = "regressao"
@@ -42,14 +64,14 @@ if arquivo is not None:
     st.info(f"🔎 Detectado problema de **{problema.upper()}**")
 
     # =========================================
-    # 4. Split dos dados
+    # 5. Split dos dados
     # =========================================
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
     # =========================================
-    # 5. Definição dos modelos
+    # 6. Definição dos modelos
     # =========================================
     if problema == "regressao":
         modelos = {
@@ -68,7 +90,7 @@ if arquivo is not None:
     st.subheader("🤖 Treinamento dos Modelos")
 
     # =========================================
-    # 6. Loop de treinamento
+    # 7. Loop de treinamento
     # =========================================
     for nome, modelo in modelos.items():
         inicio = time.time()
@@ -106,7 +128,7 @@ if arquivo is not None:
             st.error(f"❌ Erro ao treinar {nome}: {e}")
 
     # =========================================
-    # 7. Gráfico comparativo das métricas
+    # 8. Gráfico comparativo das métricas
     # =========================================
     if resultados:
         st.subheader("📊 Comparativo de Modelos")
@@ -116,3 +138,13 @@ if arquivo is not None:
         else:
             fig = px.bar(df_resultados, x="Modelo", y="f1", title="Comparação de F1 entre modelos")
         st.plotly_chart(fig, use_container_width=True)
+
+        # =========================================
+        # 9. Botão para download das métricas em CSV
+        # =========================================
+        st.download_button(
+            label="📥 Baixar métricas em CSV",
+            data=df_resultados.to_csv(index=False).encode("utf-8"),
+            file_name="metricas_modelos.csv",
+            mime="text/csv"
+        )
