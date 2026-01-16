@@ -128,23 +128,53 @@ if arquivo is not None:
             st.error(f"❌ Erro ao treinar {nome}: {e}")
 
     # =========================================
-    # 8. Gráfico comparativo das métricas
+    # 8. Abas para resultados e relatório final
     # =========================================
-    if resultados:
-        st.subheader("📊 Comparativo de Modelos")
-        df_resultados = pd.DataFrame(resultados).T.reset_index().rename(columns={"index": "Modelo"})
-        if problema == "regressao":
-            fig = px.bar(df_resultados, x="Modelo", y="R2", title="Comparação de R² entre modelos")
-        else:
-            fig = px.bar(df_resultados, x="Modelo", y="f1", title="Comparação de F1 entre modelos")
-        st.plotly_chart(fig, use_container_width=True)
+    aba_resultados, aba_relatorio = st.tabs(["📊 Resultados", "📑 Relatório Final"])
 
-        # =========================================
-        # 9. Botão para download das métricas em CSV
-        # =========================================
-        st.download_button(
-            label="📥 Baixar métricas em CSV",
-            data=df_resultados.to_csv(index=False).encode("utf-8"),
-            file_name="metricas_modelos.csv",
-            mime="text/csv"
-        )
+    with aba_resultados:
+        if resultados:
+            st.subheader("📊 Comparativo de Modelos")
+            df_resultados = pd.DataFrame(resultados).T.reset_index().rename(columns={"index": "Modelo"})
+            if problema == "regressao":
+                fig = px.bar(df_resultados, x="Modelo", y="R2", title="Comparação de R² entre modelos")
+            else:
+                fig = px.bar(df_resultados, x="Modelo", y="f1", title="Comparação de F1 entre modelos")
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.download_button(
+                label="📥 Baixar métricas em CSV",
+                data=df_resultados.to_csv(index=False).encode("utf-8"),
+                file_name="metricas_modelos.csv",
+                mime="text/csv"
+            )
+
+    with aba_relatorio:
+        st.subheader("📑 Relatório Final e Insights de Negócio")
+
+        if resultados:
+            melhor_modelo = max(resultados.items(), key=lambda x: x[1].get("R2", x[1].get("f1", 0)))
+            nome_modelo, metricas = melhor_modelo
+
+            st.write(f"✅ O melhor modelo foi **{nome_modelo}** com desempenho:")
+            st.write(metricas)
+
+            # Insights de negócio
+            if problema == "classificacao":
+                st.info("🔎 Insights: O modelo de classificação pode ajudar a prever perfis de clientes, "
+                        "identificar riscos de inadimplência ou segmentar públicos para campanhas.")
+            else:
+                st.info("🔎 Insights: O modelo de regressão pode apoiar previsões de vendas, "
+                        "estimativas de receita futura ou análise de impacto de variáveis econômicas.")
+
+            # Relatório textual consolidado
+            relatorio = f"""
+            Relatório Final:
+            - Tipo de problema: {problema.upper()}
+            - Melhor modelo: {nome_modelo}
+            - Principais métricas: {metricas}
+            - Potenciais aplicações de negócio: {('Previsão de vendas, análise financeira, planejamento estratégico'
+                                                 if problema == 'regressao' else
+                                                 'Segmentação de clientes, análise de risco, campanhas direcionadas')}
+            """
+            st.text(relatorio)
