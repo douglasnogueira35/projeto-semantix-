@@ -138,22 +138,34 @@ if arquivo:
         }
 
     resultados, modelos_treinados = {}, {}
-    st.subheader("🤖 Treinamento dos Modelos")
+st.subheader("🤖 Treinamento dos Modelos")
 
-    for nome, modelo in modelos.items():
-        inicio = time.time()
+for nome, modelo in modelos.items():
+    inicio = time.time()
+
+    # Proteção contra dataset vazio
+    if len(y_train) == 0 or len(X_train) == 0:
+        st.error("⚠️ Conjunto de treino vazio. Use mais linhas ou desative o modo rápido.")
+        continue
+
+    try:
         modelo.fit(X_train, y_train)
         tempo = time.time() - inicio
 
+        # Previsões
         y_pred = modelo.predict(X_test) if len(y_test) > 0 else []
+
+        # Métricas
         metricas = calcular_metricas(y_test, y_pred, problema) if len(y_test) > 0 else {}
         metricas["tempo"] = tempo
 
-        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42) if problema == "classificacao" else 5
+        # Validação cruzada
         if problema == "classificacao":
+            cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
             f1_cv = cross_val_score(modelo, X, y, cv=cv, scoring="f1_weighted").mean()
             metricas["f1_cv"] = f1_cv
         else:
+            cv = 5
             r2_cv = cross_val_score(modelo, X, y, cv=cv, scoring="r2").mean()
             metricas["R2_cv"] = r2_cv
 
@@ -161,6 +173,8 @@ if arquivo:
         modelos_treinados[nome] = modelo
         st.success(f"{nome} treinado em {tempo:.2f}s")
 
+    except ValueError as e:
+        st.error(f"❌ Erro ao treinar {nome}: {e}")
     # Abas
     aba1, aba2, aba3 = st.tabs([
         "📊 Comparação dos Modelos",
