@@ -206,21 +206,22 @@ if arquivo is not None:
             )
 
             # PDF
-            buffer_pdf = io.BytesIO()
-            c = canvas.Canvas(buffer_pdf, pagesize=letter)
-            c.drawString(50, 750, "Relatório Final")
-            c.drawString(50, 730, f"Tipo de problema: {problema.upper()}")
-            c.drawString(50, 710, f"Melhor modelo: {nome_modelo}")
-            c.drawString(50, 690, f"Métricas: {metricas}")
-            c.save()
-            pdf_bytes = buffer_pdf.getvalue()
-            buffer_pdf.close()
+buffer_pdf = io.BytesIO()
+c = canvas.Canvas(buffer_pdf, pagesize=letter)
+c.drawString(50, 750, "Relatório Final")
+c.drawString(50, 730, f"Tipo de problema: {problema.upper()}")
+c.drawString(50, 710, f"Melhor modelo: {nome_modelo}")
+c.drawString(50, 690, f"Métricas: {metricas}")
+c.save()
 
-            Botão para download do PDF
-            st.download_button(
-                label="📥 Baixar relatório em PDF",
-                data=pdf_bytes,
-                file_name="relatorio_final.pdf",
-                mime="application/pdf"
+# Obter os bytes do PDF
+pdf_bytes = buffer_pdf.getvalue()
+buffer_pdf.close()
+
+# Botão para download do PDF
+st.download_button(
+    label="📥 Baixar relatório em PDF",
+    data=pdf_bytes,
+    file_name="relatorio_final.pdf",
+    mime="application/pdf"
 )
-
