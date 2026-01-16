@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time
+import io
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -11,7 +12,6 @@ from sklearn.metrics import (
 )
 from xgboost import XGBClassifier, XGBRegressor
 import plotly.express as px
-import io
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
@@ -190,14 +190,14 @@ if arquivo is not None:
 
             st.download_button(
                 label="📥 Baixar relatório em CSV",
-                data=df_resultados.to_csv(index=False).encode("utf-8"),
+                data=pd.DataFrame([metricas]).to_csv(index=False).encode("utf-8"),
                 file_name="relatorio_final.csv",
                 mime="text/csv"
             )
 
             # Excel
             buffer_excel = io.BytesIO()
-            df_resultados.to_excel(buffer_excel, index=False, engine="openpyxl")
+            pd.DataFrame([metricas]).to_excel(buffer_excel, index=False, engine="openpyxl")
             st.download_button(
                 label="📥 Baixar relatório em Excel",
                 data=buffer_excel.getvalue(),
@@ -208,13 +208,15 @@ if arquivo is not None:
             # PDF
 buffer_pdf = io.BytesIO()
 c = canvas.Canvas(buffer_pdf, pagesize=letter)
+
+# Conteúdo do relatório
 c.drawString(50, 750, "Relatório Final")
 c.drawString(50, 730, f"Tipo de problema: {problema.upper()}")
 c.drawString(50, 710, f"Melhor modelo: {nome_modelo}")
 c.drawString(50, 690, f"Métricas: {metricas}")
-c.save()
 
-# Obter os bytes do PDF
+# Finalizar PDF
+c.save()
 pdf_bytes = buffer_pdf.getvalue()
 buffer_pdf.close()
 
