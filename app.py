@@ -91,7 +91,7 @@ if df is not None:
         "📏 Quantidade de linhas para usar",
         min_value=50,
         max_value=max_linhas,
-        value=min(1000, max_linhas),
+        value=min(300, max_linhas),
         step=50
     )
     df = df.head(qtd_linhas)
