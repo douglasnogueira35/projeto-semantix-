@@ -11,6 +11,9 @@ from sklearn.metrics import (
 )
 from xgboost import XGBClassifier, XGBRegressor
 import plotly.express as px
+import io
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 st.title("🤖 Projeto AutoML Inteligente")
 
@@ -159,7 +162,6 @@ if arquivo is not None:
             st.write(f"✅ O melhor modelo foi **{nome_modelo}** com desempenho:")
             st.write(metricas)
 
-            # Insights de negócio
             if problema == "classificacao":
                 st.info("🔎 Insights: O modelo de classificação pode ajudar a prever perfis de clientes, "
                         "identificar riscos de inadimplência ou segmentar públicos para campanhas.")
@@ -177,4 +179,48 @@ if arquivo is not None:
                                                  if problema == 'regressao' else
                                                  'Segmentação de clientes, análise de risco, campanhas direcionadas')}
             """
-            st.text(relatorio)
+
+            # Botões de download
+            st.download_button(
+                label="📥 Baixar relatório em TXT",
+                data=relatorio.encode("utf-8"),
+                file_name="relatorio_final.txt",
+                mime="text/plain"
+            )
+
+            st.download_button(
+                label="📥 Baixar relatório em CSV",
+                data=df_resultados.to_csv(index=False).encode("utf-8"),
+                file_name="relatorio_final.csv",
+                mime="text/csv"
+            )
+
+            # Excel
+            buffer_excel = io.BytesIO()
+            df_resultados.to_excel(buffer_excel, index=False, engine="openpyxl")
+            st.download_button(
+                label="📥 Baixar relatório em Excel",
+                data=buffer_excel.getvalue(),
+                file_name="relatorio_final.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+
+            # PDF
+            buffer_pdf = io.BytesIO()
+            c = canvas.Canvas(buffer_pdf, pagesize=letter)
+            c.drawString(50, 750, "Relatório Final")
+            c.drawString(50, 730, f"Tipo de problema: {problema.upper()}")
+            c.drawString(50, 710, f"Melhor modelo: {nome_modelo}")
+            c.drawString(50, 690, f"Métricas: {metricas}")
+            c.save()
+            pdf_bytes = buffer_pdf.getvalue()
+            buffer_pdf.close()
+
+            Botão para download do PDF
+            st.download_button(
+                label="📥 Baixar relatório em PDF",
+                data=pdf_bytes,
+                file_name="relatorio_final.pdf",
+                mime="application/pdf"
+)
+
